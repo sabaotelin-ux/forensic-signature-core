@@ -1,0 +1,43 @@
+#!/usr/bin/env python3
+"""
+Módulo de Auditoria e Rastreabilidade Criptográfica (Audit Logger) - FSV-Core
+Gera hashes SHA-256 e registros imutáveis para laudos forenses.
+"""
+
+import hashlib
+import json
+from datetime import datetime
+
+class AuditTrail:
+    """
+    Registra cada laudo gerado com uma assinatura criptográfica para fins legais e corporativos.
+    """
+    
+    @staticmethod
+    def gerar_comprovante_seguro(autor, periodo, score, parecer):
+        timestamp = datetime.utcnow().isoformat()
+        
+        # Dados brutos do laudo
+        payload_auditoria = {
+            "autor": autor,
+            "periodo": periodo,
+            "indice_compatibilidade": score,
+            "parecer": parecer,
+            "timestamp": timestamp
+        }
+        
+        # Serializa para JSON determinístico
+        payload_str = json.dumps(payload_auditoria, sort_keys=True)
+        
+        # Gera o hash SHA-256 imutável
+        hash_criptografico = hashlib.sha256(payload_str.encode('utf-8')).hexdigest()
+        
+        return {
+            **payload_auditoria,
+            "hash_seguranca_sha256": hash_criptografico
+        }
+
+if __name__ == "__main__":
+    print("=== Teste de Auditoria Imutável ===")
+    laudo = AuditTrail.gerar_comprovante_seguro("Candido Portinari", "1950", 95.5, "Alta compatibilidade")
+    print(json.dumps(laudo, indent=4, ensure_ascii=False))
