@@ -1,27 +1,44 @@
-![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
- #FSV-Core: Forensic Signature & Provenance Engine (v2.0)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENÇA)
 
-**FSV-Core** é um motor computacional open-source projetado para a análise geométrica, mapeamento matricial e triagem forense de assinaturas, rubricas e dedicatórias em livros raros, gravuras e manuscritos históricos.
+# 🔍 FSV-Core: Motor de Assinaturas e Proveniências Forenses (v2.0)
+
+> **FSV-Core** é um motor computacional de código aberto projetado para a análise geométrica, mapeamento matricial e rastreamento forense de assinaturas, rubricas e dedicatórias em livros raros, gravuras e manuscritos históricos.
+
+---
 
 ## 💡 O Problema
-O mercado global de arte, antiguidades e acervos literários raros movimenta bilhões, mas sofre constantemente com fraudes, cópias grosseiras e a escassez de peritos caligráficos disponíveis para vistorias preliminares imediatas em obras recém-descobertas.
+Autenticar obras raras e assinaturas históricas manualmente é um processo lento, sujeito a falhas humanas e caro. Além disso, IAs tradicionais baseadas apenas em texto frequentemente sofrem com **alucinações**.
 
-## 🚀 A Solução (Abordagem v2.0)
-Diferente de ferramentas tradicionais de OCR focadas em texto comercial, o **FSV-Core v2.0** implementa um motor de processamento matemático de traços baseado em:
-1. **Mapeamento Matricial de Pixels:** Conversão do suporte gráfico em matrizes de coordenadas discretas, isolando o traço do fundo físico.
-2. **Análise de Densidade Estrutural:** Cálculo de proporção de ocupação, bounding box dinâmica e centro de massa geométrica.
-3. **Índice de Compatibilidade Percentual:** Algoritmo matemático para mensurar a similaridade estrutural entre uma assinatura de referência e uma amostra de teste.
+## 🚀 A Solução (Abordagem Híbrida)
+O **FSV-Core** resolve isso combinando:
+1. **Precisão Matemática Determinística:** Análise geométrica de traços por matrizes e distâncias euclidianas.
+2. **Busca Híbrida Blindada:** Cruzamento estrito com um banco de dados de referência validado.
+3. **Trilha de Auditoria Criptográfica:** Geração de laudos com assinaturas SHA-256 inalteráveis.
 
-## 🛠️ Arquitetura do Repositório
-* `src/analyzer.py` — Motor matemático principal de processamento de matrizes e métricas forenses.
-* `data/` — Diretório reservado para conjuntos de referência (Datasets de Ouro).
+---
 
-## 📊 Exemplo de Uso Técnico (v2.0)
-O motor processa matrizes de pixels representando o traço da escrita para gerar relatórios de compatibilidade geométrica de forma leve, sem dependências externas complexas:
+## 📂 Arquitetura do Repositório
 
-```python
-from src.analyzer import AdvancedSignatureAnalyzer, comparar_metricas
+| Módulo / Arquivo | Função Principal |
+| :--- | :--- |
+| **`src/analyzer.py`** | Núcleo de cálculo geométrico e métricas de traço. |
+| **`src/validator.py`** | Sanitização estrita e bloqueio de dados corrompidos. |
+| **`src/hybrid_search.py`** | Sistema de busca combinada (texto + matriz). |
+| **`src/database_mock.py`** | Base de acervo histórico de referência isolada. |
+| **`src/audit_logger.py`** | Geração de hashes SHA-256 para laudos periciais. |
+| **`src/vision_extractor.py`** | Visão computacional para conversão de fotos em matrizes. |
+| **`src/feedback_memory.py`** | Memória dinâmica para aprendizado por casos. |
+| **`src/api.py`** | Gateway FastAPI de alta performance. |
+| **`executar.py`** | Orquestrador para inicialização segura do servidor. |
+| **`index.html`** | Painel visual web intuitivo para triagem. |
+| **`testes/test_core.py`**| Bateria de testes automatizados de integridade. |
 
-# Matrizes simuladas de binarização de traço (1 = Traço, 0 = Fundo)
-# ...
+---
+
+## 🛠️ Como Executar e Testar Localmente
+
+1. **Clone o repositório:**
+   ```bash
+   git clone [https://github.com/sabaotelin-ux/forensic-signature-core.git](https://github.com/sabaotelin-ux/forensic-signature-core.git)
+   cd forensic-signature-core
 
