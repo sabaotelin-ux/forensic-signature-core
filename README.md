@@ -1,4 +1,5 @@
-# FSV-Core: Forensic Signature & Provenance Engine (v2.0)
+![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
+ #FSV-Core: Forensic Signature & Provenance Engine (v2.0)
 
 **FSV-Core** é um motor computacional open-source projetado para a análise geométrica, mapeamento matricial e triagem forense de assinaturas, rubricas e dedicatórias em livros raros, gravuras e manuscritos históricos.
 
