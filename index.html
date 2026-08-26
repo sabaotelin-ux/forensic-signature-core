@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FSV-Core | Painel de Auditoria e Proveniência</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-900 text-slate-100 font-sans min-p-6">
+    <div class="max-w-4xl mx-auto p-6">
+        <header class="mb-8 border-b border-slate-800 pb-4">
+            <h1 class="text-3xl font-bold text-emerald-400">FSV-Core Engine v2.0</h1>
+            <p class="text-slate-400">Sistema Híbrido de Triagem Forense e Análise de Obras Raras</p>
+        </header>
+
+        <main class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="bg-slate-800 p-6 rounded-xl border border-slate-700 shadow-lg">
+                <h2 class="text-xl font-semibold mb-4 text-slate-200">Parâmetros de Análise</h2>
+                <div class="mb-4">
+                    <label class="block text-sm text-slate-400 mb-2">Selecione o Acervo de Referência:</label>
+                    <select id="autorChave" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-slate-200">
+                        <option value="portinari_1950">Candido Portinari (1950)</option>
+                        <option value="picasso_1964">Pablo Picasso (1964)</option>
+                    </select>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm text-slate-400 mb-2">Matriz de Traço (Simulação Binária):</label>
+                    <textarea id="matrizInput" rows="4" class="w-full bg-slate-900 border border-slate-700 rounded p-2 font-mono text-sm text-emerald-300">[[0, 1, 1], [1, 0, 1], [0, 1, 0]]</textarea>
+                </div>
+                <button onclick="executarAuditoria()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 px-4 rounded transition-all">
+                    Processar Laudo Determinístico
+                </button>
+            </div>
+
+            <div class="bg-slate-800 p-6 rounded-xl border border-slate-700 shadow-lg">
+                <h2 class="text-xl font-semibold mb-4 text-slate-200">Laudo Técnico Preliminar</h2>
+                <div id="resultadoBox" class="bg-slate-900 border border-slate-700 rounded p-4 h-48 overflow-y-auto font-mono text-sm text-slate-300">
+                    Aguardando submissão de dados para triagem...
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        async function executarAuditoria() {
+            const autorChave = document.getElementById('autorChave').value;
+            let matrizTexto = document.getElementById('matrizInput').value;
+            const box = document.getElementById('resultadoBox');
+
+            try {
+                const amostra_matriz = JSON.parse(matrizTexto);
+                box.innerHTML = "Processando análise matemática de alta precisão...";
+
+                const response = await fetch('http://127.0.0.1:8000/auditar', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ autor_chave: autorChave, amostra_matriz: amostra_matriz })
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    box.innerHTML = `<span class="text-emerald-400 font-bold">Status: SUCESSO</span>\n` +
+                                    `Autor: ${data.autor}\n` +
+                                    `Período: ${data.periodo}\n` +
+                                    `Compatibilidade: ${data.indice_compatibilidade}%\n` +
+                                    `Parecer: ${data.parecer_preliminar}`;
+                } else {
+                    box.innerHTML = `<span class="text-rose-400 font-bold">Erro de Validação:</span>\n${data.detail}`;
+                }
+            } catch (err) {
+                box.innerHTML = `<span class="text-rose-400 font-bold">Erro de Conexão:</span> Certifique-se de que o servidor 'run.py' está rodando na porta 8000.`;
+            }
+        }
+    </script>
+</body>
+</html>
