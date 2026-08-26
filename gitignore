@@ -1,0 +1,14 @@
+# Arquivos de bytecode e cache do Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Configurações de ambiente e IDEs
+.vscode/
+.idea/
+*.swp
+
+# Ambientes virtuais
+env/
+venv/
+ENV/
