@@ -51,7 +51,7 @@
                 const amostra_matriz = JSON.parse(matrizTexto);
                 box.innerHTML = "Processando análise matemática de alta precisão...";
 
-                const response = await fetch('http://127.0.0.1:8000/auditar', {
+                const response = await fetch('/auditar', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ autor_chave: autorChave, amostra_matriz: amostra_matriz })
