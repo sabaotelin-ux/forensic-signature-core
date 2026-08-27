@@ -1,25 +1,15 @@
-#!/usr/bin/env python3
-"""
-FSV-Core API - Motor Híbrido de Triagem Forense e Proveniência
-"""
-
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, FileResponse
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
 from typing import List
 import os
 
-from validator import DataSanitizer
-from src.analyzer import AdvancedSignatureAnalyzer, comparar_metricas
-from database_mock import SignatureDatabaseMock
-
 app = FastAPI(
-    title="FSV-Core API",
-    description="Motor Híbrido de Triagem Forense e Proveniência de Assinaturas",
-    version="2.0"
+    title="API de Análise de Assinatura",
+    version="1.0"
 )
 
+# CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -29,15 +19,15 @@ app.add_middleware(
 )
 
 class AnaliseRequest(BaseModel):
-    autor_chave: str = Field(..., example="portinari_1950")
+    autor_chave: str = Field(..., example="exemplo")
     amostra_matriz: List[List[int]] = Field(
         ...,
         example=[
-            [0,0,0,0,0,0,0,0,0,0],
-            [0,1,1,1,1,0,0,1,0,0],
-            [0,0,1,0,0,0,1,1,1,0],
-            [0,0,1,0,0,0,0,1,0,0],
-            [0,0,0,0,0,0,0,0,0,0]
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 1, 1, 1, 1, 0, 0, 1, 0, 0],
+            [0, 0, 1, 0, 0, 0, 1, 1, 1, 0],
+            [0, 0, 1, 0, 0, 0, 0, 1, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         ]
     )
 
@@ -45,24 +35,22 @@ class AnaliseRequest(BaseModel):
 def home():
     if os.path.exists("index.html"):
         return FileResponse("index.html")
-    return {"status": "online", "docs": "/docs"}
+    return {"status": "on-line", "docs": "/docs"}
 
-@app.get("/health")
-def health():
-    return {"status": "ok"}
+@app.get("/saude")
+def saude():
+    return {"status": "OK"}
 
 @app.get("/autores")
 def listar_autores():
-    db = SignatureDatabaseMock()
-    return {"autores_disponiveis": db.listar_autores_disponiveis()}
+    # Você precisa ter a classe AssinaturaDatabaseMock definida
+    db = AssinaturaDatabaseMock()
+    return {"autores_disponiveis": db.listar()}
 
-@app.post("/auditar")
-def auditar_assinatura(payload: AnaliseRequest):
-    validacao = DataSanitizer.validar_matriz_assinatura(payload.amostra_matriz)
-    if not validacao["valido"]:
-        raise HTTPException(status_code=400, detail=validacao["erro"])
+@app.post("/auditor")
+def auditar_assinatura(carga_util: AnaliseRequest):
+    # Você precisa ter a classe DataSanitizer definida
+    validacao = DataSanitizer.validar_matriz(carga_util.amostra_matriz)
     
-    db = SignatureDatabaseMock()
-    registro = db.buscar_referencia(payload.autor_chave)
-    if registro["status"] == "erro":
-        raise HTTPException(status_code=404, detail=
+    if not validacao["valido"]:
+        return {"erro": "Matriz inválida
