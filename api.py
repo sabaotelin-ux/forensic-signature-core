@@ -1,15 +1,16 @@
 #!/usr/bin/env python3
 """
 Módulo de API Gateway (FSV-Core API)
-Expõe o motor matemático e a busca determinística via HTTP para integração comercial.
+Expõe o motor matemático e a busca determinística via HTTP.
 """
 
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from typing import List
-from src.validator import DataSanitizer
+
+from validator import DataSanitizer
 from src.analyzer import AdvancedSignatureAnalyzer, comparar_metricas
-from src.database_mock import SignatureDatabaseMock
+from database_mock import SignatureDatabaseMock
 
 app = FastAPI(
     title="FSV-Core API",
@@ -36,7 +37,7 @@ def auditar_assinatura(payload: AnaliseRequest):
     
     metrica_ref = registro["metrica_padrao"]
 
-    # 3. Processamento matemático de alta precisão
+    # 3. Processamento matemático
     analisador = AdvancedSignatureAnalyzer(payload.amostra_matriz)
     metrica_teste = analisador.compute_geometric_metrics()
     
