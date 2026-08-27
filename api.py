@@ -53,4 +53,4 @@ def auditar_assinatura(carga_util: AnaliseRequest):
     validacao = DataSanitizer.validar_matriz(carga_util.amostra_matriz)
     
     if not validacao["valido"]:
-        return {"erro": "Matriz inválida
+        return {"erro": "Matriz inválida", "detalhes": validacao}
