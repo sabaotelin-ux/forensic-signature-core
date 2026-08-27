@@ -1,3 +1,3 @@
-# FSV-Core v2.0 - Dependências
-# O motor roda nativamente em Python 3.8+ usando a biblioteca padrão.
-# Nenhuma biblioteca externa pesada (como OpenCV ou NumPy) é necessária para a execução do core.
+fastapi
+uvicorn[standard]
+pydantic
