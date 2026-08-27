@@ -1,56 +1,60 @@
-from fastapi import FastAPI, FileResponse
-from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel, Field
+from fastapi import FastAPI, HTTPException
+from fastapi.responses import FileResponse
+from pydantic import BaseModel
 from typing import List
 import os
 
-app = FastAPI(
-    title="API de Análise de Assinatura",
-    version="1.0"
-)
+# Imports dos módulos do projeto
+from src.analyzer import AdvancedSignatureAnalyzer, comparar_metricas
+from database_mock import SignatureDatabaseMock
 
-# CORS
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+app = FastAPI(
+    title="FSV-Core API",
+    description="Motor de Análise Forense de Assinaturas",
+    version="2.0"
 )
 
 class AnaliseRequest(BaseModel):
-    autor_chave: str = Field(..., example="exemplo")
-    amostra_matriz: List[List[int]] = Field(
-        ...,
-        example=[
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 1, 1, 1, 1, 0, 0, 1, 0, 0],
-            [0, 0, 1, 0, 0, 0, 1, 1, 1, 0],
-            [0, 0, 1, 0, 0, 0, 0, 1, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-        ]
-    )
+    autor_chave: str
+    amostra_matriz: List[List[int]]
+
 
 @app.get("/")
 def home():
     if os.path.exists("index.html"):
         return FileResponse("index.html")
-    return {"status": "on-line", "docs": "/docs"}
+    return {"status": "online", "docs": "/docs"}
+
 
 @app.get("/saude")
 def saude():
     return {"status": "OK"}
 
+
 @app.get("/autores")
 def listar_autores():
-    # Você precisa ter a classe AssinaturaDatabaseMock definida
-    db = AssinaturaDatabaseMock()
-    return {"autores_disponiveis": db.listar()}
+    db = SignatureDatabaseMock()
+    return {"autores_disponiveis": db.listar_autores_disponiveis()}
 
-@app.post("/auditor")
-def auditar_assinatura(carga_util: AnaliseRequest):
-    # Você precisa ter a classe DataSanitizer definida
-    validacao = DataSanitizer.validar_matriz(carga_util.amostra_matriz)
+
+@app.post("/auditar")
+def auditar_assinatura(payload: AnaliseRequest):
+    # Busca referência
+    db = SignatureDatabaseMock()
+    registro = db.buscar_referencia(payload.autor_chave)
     
-    if not validacao["valido"]:
-        return {"erro": "Matriz inválida", "detalhes": validacao}
+    if registro.get("status") == "erro":
+        raise HTTPException(status_code=404, detail=registro["mensagem"])
+    
+    # Análise geométrica
+    analisador = AdvancedSignatureAnalyzer(payload.amostra_matriz)
+    metrica_teste = analisador.compute_geometric_metrics()
+    
+    if metrica_teste.get("status") == "erro":
+        raise HTTPException(status_code=400, detail=metrica_teste["mensagem"])
+    
+    # Comparação
+    metrica_ref = registro["metrica_padrao"]
+    score = comparar_metricas(metrica_ref, metrica_teste)
+    
+    parecer = (
