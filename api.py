@@ -4,7 +4,6 @@ from pydantic import BaseModel
 from typing import List
 import os
 
-# Imports dos módulos do projeto
 from src.analyzer import AdvancedSignatureAnalyzer, comparar_metricas
 from database_mock import SignatureDatabaseMock
 
@@ -39,22 +38,31 @@ def listar_autores():
 
 @app.post("/auditar")
 def auditar_assinatura(payload: AnaliseRequest):
-    # Busca referência
     db = SignatureDatabaseMock()
     registro = db.buscar_referencia(payload.autor_chave)
     
     if registro.get("status") == "erro":
         raise HTTPException(status_code=404, detail=registro["mensagem"])
     
-    # Análise geométrica
     analisador = AdvancedSignatureAnalyzer(payload.amostra_matriz)
     metrica_teste = analisador.compute_geometric_metrics()
     
     if metrica_teste.get("status") == "erro":
         raise HTTPException(status_code=400, detail=metrica_teste["mensagem"])
     
-    # Comparação
     metrica_ref = registro["metrica_padrao"]
     score = comparar_metricas(metrica_ref, metrica_teste)
     
     parecer = (
+        "Alta compatibilidade com o Dataset de Ouro."
+        if score >= 90.0
+        else "Divergência estrutural detectada."
+    )
+    
+    return {
+        "autor": registro["autor"],
+        "periodo": registro["periodo"],
+        "indice_compatibilidade": score,
+        "parecer_preliminar": parecer,
+        "status": "sucesso"
+    }
