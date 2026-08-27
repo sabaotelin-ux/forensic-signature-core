@@ -1,68 +1,38 @@
 from fastapi import FastAPI, HTTPException
-from fastapi.responses import FileResponse
 from pydantic import BaseModel
-from typing import List
-import os
-
-from src.analyzer import AdvancedSignatureAnalyzer, comparar_metricas
-from database_mock import SignatureDatabaseMock
+from auditor import FolgaAuditor
 
 app = FastAPI(
-    title="FSV-Core API",
-    description="Motor de Análise Forense de Assinaturas",
-    version="2.0"
+    title="FSV-Audit",
+    description="Motor Híbrido de Auditoria e Detecção de Folgas em Respostas de IA",
+    version="1.0.0"
 )
 
-class AnaliseRequest(BaseModel):
-    autor_chave: str
-    amostra_matriz: List[List[int]]
+auditor = FolgaAuditor()
 
+class TextoRequest(BaseModel):
+    texto: str
+    origem: str = "desconhecida"  # opcional: chatgpt, claude, grok, etc.
 
 @app.get("/")
 def home():
-    if os.path.exists("index.html"):
-        return FileResponse("index.html")
-    return {"status": "online", "docs": "/docs"}
-
+    return {
+        "status": "online",
+        "servico": "FSV-Audit",
+        "versao": "1.0.0",
+        "docs": "/docs"
+    }
 
 @app.get("/saude")
 def saude():
     return {"status": "OK"}
 
-
-@app.get("/autores")
-def listar_autores():
-    db = SignatureDatabaseMock()
-    return {"autores_disponiveis": db.listar_autores_disponiveis()}
-
-
 @app.post("/auditar")
-def auditar_assinatura(payload: AnaliseRequest):
-    db = SignatureDatabaseMock()
-    registro = db.buscar_referencia(payload.autor_chave)
-    
-    if registro.get("status") == "erro":
-        raise HTTPException(status_code=404, detail=registro["mensagem"])
-    
-    analisador = AdvancedSignatureAnalyzer(payload.amostra_matriz)
-    metrica_teste = analisador.compute_geometric_metrics()
-    
-    if metrica_teste.get("status") == "erro":
-        raise HTTPException(status_code=400, detail=metrica_teste["mensagem"])
-    
-    metrica_ref = registro["metrica_padrao"]
-    score = comparar_metricas(metrica_ref, metrica_teste)
-    
-    parecer = (
-        "Alta compatibilidade com o Dataset de Ouro."
-        if score >= 90.0
-        else "Divergência estrutural detectada."
-    )
-    
-    return {
-        "autor": registro["autor"],
-        "periodo": registro["periodo"],
-        "indice_compatibilidade": score,
-        "parecer_preliminar": parecer,
-        "status": "sucesso"
-    }
+def auditar_resposta(payload: TextoRequest):
+    if not payload.texto or len(payload.texto.strip()) < 10:
+        raise HTTPException(status_code=400, detail="Texto muito curto para auditoria")
+
+    resultado = auditor.auditar(payload.texto)
+    resultado["origem_informada"] = payload.origem
+
+    return resultado
